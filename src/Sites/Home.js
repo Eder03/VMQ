@@ -31,7 +31,7 @@ export default class ApiForm extends Component {
           <br></br>
 
 
-          <Image centered src='C:\Users\Huawei\Desktop\VMQ\Umsetzung\React\vmq\frontend\src\static\VMQ_OMG_DAS_IST_DAS_BESTE_LOGO.png' size='large'/>
+          <Image centered src='./VMQ_OMG_DAS_IST_DAS_BESTE_LOGO.png' size='large'/>
           <Segment textAlign='center'>
             <Grid textAlign='center'>
             <Grid.Row >
