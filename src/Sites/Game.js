@@ -31,13 +31,16 @@ export default class ApiForm extends Component {
       timer: 20,
       totalSongs: 0,
       guessingRate: 0,
-      countdownPlaying: false
+      countdownPlaying: false,
+      checkRemainingTime: false,
+      skin: 0
     }
     this.onSubmit = this.onSubmit.bind(this);
     this.onChangeDropdown = this.onChangeDropdown.bind(this);
   }
 
   componentDidMount() {
+    this.setState({skin: "./skins/"+Math.floor(Math.random() * (3 - 1) + 1)+".png"})
     axios.get('https://vmq-server.herokuapp.com/getAll')
       .then(res => {
         this.setState({ musicData: res.data });
@@ -52,8 +55,8 @@ export default class ApiForm extends Component {
           this.state.dropdownOptions.push({ key: this.state.dropdownData[j], text: this.state.dropdownData[j], value: this.state.dropdownData[j] })
         }
         this.randomSong()
-        this.intervalID = setInterval(e => this.randomSong(), 20000)
-        this.timerInterval = setInterval(e => this.changeTimer(), 999)
+        //this.intervalID = setInterval(e => this.randomSong(), 25000)
+        //this.timerInterval = setInterval(e => this.changeTimer(), 1000)
 
       })
       .catch(function (error) {
@@ -67,7 +70,9 @@ export default class ApiForm extends Component {
 
   componentWillUnmount() {
     clearInterval(this.intervalID)
-    this.setState({ points: 0, userGuess: 'ratio', game: '', musicData: [] })
+    this.setState({ points: 0, userGuess: 'ratio', game: '', musicData: [], countdownPlaying: false })
+    this.timerInterval = 0;
+    this.intervalID = 0;
   }
 
   sleep(time) {
@@ -79,27 +84,29 @@ export default class ApiForm extends Component {
     this.setState({ timer: this.state.timer - 1 })
 
     if (this.state.timer == 0) {
-      this.setState({ timer: 20 })
+      this.setState({countdownPlaying: false})
+      this.setState({timer: 25})
     }
   }
 
   intervalID = 0;
   timerInterval = 0;
   randomSong = () => {
+    console.log(this.state.skin)
     var k = Math.floor(Math.random() * this.state.musicData.length);
     var p = Math.floor(Math.random() * this.state.musicData[k].songs.length);
     this.setState({ video: "https://www.youtube.com/embed/" + this.state.musicData[k].songs[p].link + "?start=10&autoplay=1", currentGame: this.state.musicData[k], countdownPlaying: true })
-    this.sleep(19850).then(() => {
+    this.sleep(20000).then(() => {
 
-      console.log(this.state.userGuess)
-      console.log(this.state.currentGame.game)
+      //console.log(this.state.userGuess)
+      //console.log(this.state.currentGame.game)
       if (this.state.userGuess == this.state.currentGame.game) {
         this.setState({ points: this.state.points + 1 })
       }
       console.log("points: " + this.state.points)
       this.setState({ gameBefore: this.state.currentGame, songBefore: this.state.currentGame.songs[p].name, totalSongs: this.state.totalSongs + 1 })
       this.setState({ guessingRate: Math.round(((this.state.points / this.state.totalSongs) * 100 + Number.EPSILON) * 100) / 100 })
-      this.setState({ iconcolor: 'grey' })
+      this.setState({ iconcolor: 'grey', checkRemainingTime: true })
 
     })
   }
@@ -131,6 +138,13 @@ export default class ApiForm extends Component {
   onChangeDropdown = (e, { value }) => this.setState({ userGuess: value })
 
    renderTime = ({ remainingTime }) => {
+
+    if (remainingTime === 0) {
+      return <div className="timer">Next song is loading...</div>;
+    }
+    /*if(remainingTime === 0 && this.state.checkRemainingTime == true){
+      this.setState({countdownPlaying: false, checkRemainingTime: false})
+    }*/
     
     return (
       <div className="timer">
@@ -164,7 +178,15 @@ export default class ApiForm extends Component {
           duration={20}
           colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
           colorsTime={[10, 6, 3, 0]}
-          onComplete={() => ({ shouldRepeat: true, delay: 0 })}
+          onComplete={() => {
+
+            this.sleep(5000).then(()=>{
+              this.randomSong()
+              
+            })
+            return {shouldRepeat: true, delay: 5} 
+             
+            }}
         >
           {this.renderTime}
         </CountdownCircleTimer>
@@ -207,7 +229,7 @@ export default class ApiForm extends Component {
             </Grid.Column>
             <Grid.Column verticalAlign='bottom'>
               <Card>
-                <Image src='https://wiki.teamfortress.com/w/images/thumb/f/f6/Heavy_Lifter.png/250px-Heavy_Lifter.png' wrapped ui={false} />
+                <Image src={this.state.skin} size="medium" />
                 <Card.Content>
                   <Card.Header>User 1</Card.Header>
                   <Card.Meta>Played a total of {this.state.totalSongs} songs in this round</Card.Meta>
