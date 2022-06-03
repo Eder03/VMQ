@@ -9,6 +9,7 @@ import pkg from 'semantic-ui-react/package.json'
 import Navbar from "./Navbar";
 import Home from "./Sites/Home"
 import Game from "./Sites/Game"
+import Multiplayer from "./Sites/Multiplayer"
 import ApiForm from "./Sites/ApiForm";
 import AddSong from "./Sites/AddSong"
 
@@ -29,6 +30,7 @@ export default function Routing() {
           
           <Route index element={<Home/>} />
           <Route path='/singleplayer' element={<Game />} />
+          <Route path='/multiplayer' element={<Multiplayer />} />
           <Route path='/addsong' element={<AddSong />} />
           <Route path='/addgame' element={<ApiForm />}   />
     </Routes>

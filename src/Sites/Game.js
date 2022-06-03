@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, GridRow, Label, Grid, Icon, Input, Message, Header, Button, Visibility, Card, Image, GridColumn, Segment} from 'semantic-ui-react'
+import { Form, GridRow, Label, Grid, Icon, Input, Message, Header, Button, Visibility, Card, Image, GridColumn, Segment } from 'semantic-ui-react'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import axios from 'axios';
 import "../Timer.css";
@@ -26,7 +26,7 @@ export default class ApiForm extends Component {
       }],
       currentGame: '',
       gameBefore: '',
-      songBefore:'',
+      songBefore: '',
       points: 0,
       timer: 20,
       totalSongs: 0,
@@ -40,7 +40,7 @@ export default class ApiForm extends Component {
   }
 
   componentDidMount() {
-    this.setState({skin: "./skins/"+Math.floor(Math.random() * (3 - 1) + 1)+".png"})
+    this.setState({ skin: "./skins/" + Math.floor(Math.random() * (4 - 1) + 1) + ".png" })
     axios.get('https://vmq-server.herokuapp.com/getAll')
       .then(res => {
         this.setState({ musicData: res.data });
@@ -84,8 +84,8 @@ export default class ApiForm extends Component {
     this.setState({ timer: this.state.timer - 1 })
 
     if (this.state.timer == 0) {
-      this.setState({countdownPlaying: false})
-      this.setState({timer: 25})
+      this.setState({ countdownPlaying: false })
+      this.setState({ timer: 25 })
     }
   }
 
@@ -111,22 +111,22 @@ export default class ApiForm extends Component {
     })
   }
 
-  renderResult(){
-    return(
+  renderResult() {
+    return (
       <div>
-      <Label>Last game info</Label>
-      <Segment compact>
-               Game: <b>{this.state.gameBefore.game}</b>
-              <br></br>
-              <br></br>
-              Gameseries: <b>{this.state.gameBefore.series}</b>
-              <br></br>
-              <br></br>
-              Song: <b>{this.state.songBefore}</b>
-            </Segment>
-            </div>
+        <Label>Last game info</Label>
+        <Segment compact>
+          Game: <b>{this.state.gameBefore.game}</b>
+          <br></br>
+          <br></br>
+          Gameseries: <b>{this.state.gameBefore.series}</b>
+          <br></br>
+          <br></br>
+          Song: <b>{this.state.songBefore}</b>
+        </Segment>
+      </div>
     )
-    
+
   };
 
 
@@ -137,7 +137,7 @@ export default class ApiForm extends Component {
 
   onChangeDropdown = (e, { value }) => this.setState({ userGuess: value })
 
-   renderTime = ({ remainingTime }) => {
+  renderTime = ({ remainingTime }) => {
 
     if (remainingTime === 0) {
       return <div className="timer">Next song is loading...</div>;
@@ -145,7 +145,7 @@ export default class ApiForm extends Component {
     /*if(remainingTime === 0 && this.state.checkRemainingTime == true){
       this.setState({countdownPlaying: false, checkRemainingTime: false})
     }*/
-    
+
     return (
       <div className="timer">
         <div className="timertext">Remaining</div>
@@ -159,8 +159,8 @@ export default class ApiForm extends Component {
   render() {
 
     let renderResult
-    if(this.state.gameBefore != ''){
-      
+    if (this.state.gameBefore != '') {
+
       renderResult = this.renderResult()
     }
     return (
@@ -172,30 +172,30 @@ export default class ApiForm extends Component {
           <Grid.Row columns={3}>
             <GridColumn></GridColumn>
             <GridColumn>
-            <div className="timer-wrapper">
-        <CountdownCircleTimer
-          isPlaying={this.state.countdownPlaying}
-          duration={20}
-          colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-          colorsTime={[10, 6, 3, 0]}
-          onComplete={() => {
+              <div className="timer-wrapper">
+                <CountdownCircleTimer
+                  isPlaying={this.state.countdownPlaying}
+                  duration={20}
+                  colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
+                  colorsTime={[10, 6, 3, 0]}
+                  onComplete={() => {
 
-            this.sleep(5000).then(()=>{
-              this.randomSong()
-              
-            })
-            return {shouldRepeat: true, delay: 5} 
-             
-            }}
-        >
-          {this.renderTime}
-        </CountdownCircleTimer>
-      </div>
+                    this.sleep(5000).then(() => {
+                      this.randomSong()
+
+                    })
+                    return { shouldRepeat: true, delay: 5 }
+
+                  }}
+                >
+                  {this.renderTime}
+                </CountdownCircleTimer>
+              </div>
             </GridColumn>
           </Grid.Row>
           <Grid.Row columns={3}>
             <Grid.Column>
-            
+
             </Grid.Column>
             <Grid.Column><Form onSubmit={this.onSubmit}>
               <Label>Guess Game</Label>
@@ -223,7 +223,7 @@ export default class ApiForm extends Component {
           </Grid.Row>
           <Grid.Row columns={5}>
             <Grid.Column>
-            {renderResult}
+              {renderResult}
             </Grid.Column>
             <Grid.Column>
             </Grid.Column>

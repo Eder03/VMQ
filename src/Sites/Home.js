@@ -38,7 +38,7 @@ export default class ApiForm extends Component {
             <Button as={Link} to='/singleplayer'content='Play' color='green'></Button>
             </Grid.Row>
             <Grid.Row >
-            <Button as={Link} to='/singleplayer'content='Multiplayer' color='green'></Button>
+            <Button as={Link} to='/multiplayer'content='Multiplayer' color='green'></Button>
             </Grid.Row>
             </Grid>
           

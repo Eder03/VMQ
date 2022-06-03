@@ -57,7 +57,6 @@ onChangeComposers(e){
 
 onChangeDropdown(e) {
 
-//Github Ehrenmann
   this.setState((currentState) =>{
   const newSongs = [];
   const game = e.target.textContent;
@@ -75,7 +74,6 @@ onChangeDropdown(e) {
       })
     }
   })
-  console.log(newSongs)
   return{
     ...currentState,
     game,
