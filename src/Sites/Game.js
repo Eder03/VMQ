@@ -11,7 +11,7 @@ export default class ApiForm extends Component {
 
     //Initialisierung der Funktionen um den Input zu akzeptieren
 
-    //Deklaration der einzelnen Datenbank Variablen
+    //Deklaration der einzelnen Datenbank Variablen und anderer Variablen
     this.state = {
       musicData: [],
       iconcolor: 'grey',
@@ -19,11 +19,7 @@ export default class ApiForm extends Component {
       video: '',
       userGuess: 'ratio',
       dropdownData: [],
-      dropdownOptions: [{
-        key: '',
-        text: '',
-        value: ''
-      }],
+      dropdownOptions: [],
       currentGame: '',
       gameBefore: '',
       songBefore: '',
@@ -40,20 +36,22 @@ export default class ApiForm extends Component {
   }
 
   componentDidMount() {
+    //Random Skin wird gesetzt
     this.setState({ skin: "./skins/" + Math.floor(Math.random() * (4 - 1) + 1) + ".png" })
+    //Get Request für alle Daten
     axios.get('https://vmq-server.herokuapp.com/getAll')
       .then(res => {
         this.setState({ musicData: res.data });
 
+        //Alle Daten werden in ein Objekt abgespeichert
         for (var i = 0; i < this.state.musicData.length; i++) {
           this.state.dropdownData.push(this.state.musicData[i].game)
         }
-        this.state.dropdownOptions[0].key = this.state.dropdownData[0]
-        this.state.dropdownOptions[0].text = this.state.dropdownData[0]
-        this.state.dropdownOptions[0].value = this.state.dropdownData[0]
-        for (var j = 1; j < this.state.dropdownData.length; j++) {
+         //DropdownOptions wird in die richtige Form gebracht und alle Daten hineingegeben
+        for (var j = 0; j < this.state.dropdownData.length; j++) {
           this.state.dropdownOptions.push({ key: this.state.dropdownData[j], text: this.state.dropdownData[j], value: this.state.dropdownData[j] })
         }
+        //Random Song wird geladen
         this.randomSong()
         //this.intervalID = setInterval(e => this.randomSong(), 25000)
         //this.timerInterval = setInterval(e => this.changeTimer(), 1000)
@@ -68,42 +66,32 @@ export default class ApiForm extends Component {
 
   }
 
+  //Alle Daten usw. werden zurückgesetzt, sobald die Seite geschlossen wird
   componentWillUnmount() {
-    clearInterval(this.intervalID)
-    this.setState({ points: 0, userGuess: 'ratio', game: '', musicData: [], countdownPlaying: false })
-    this.timerInterval = 0;
-    this.intervalID = 0;
+    this.setState({ points: 0, userGuess: '', game: '', musicData: [], countdownPlaying: false })
   }
 
+  //Sleep Funktion für den Timer
   sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time)
     )
   }
 
-  changeTimer() {
-    this.setState({ timer: this.state.timer - 1 })
-
-    if (this.state.timer == 0) {
-      this.setState({ countdownPlaying: false })
-      this.setState({ timer: 25 })
-    }
-  }
-
-  intervalID = 0;
-  timerInterval = 0;
-  randomSong = () => {
-    console.log(this.state.skin)
+  //Funktion für random Song
+  randomSong(){
+    //Random Variablen für den Song
     var k = Math.floor(Math.random() * this.state.musicData.length);
     var p = Math.floor(Math.random() * this.state.musicData[k].songs.length);
-    this.setState({ video: "https://www.youtube.com/embed/" + this.state.musicData[k].songs[p].link + "?start=10&autoplay=1", currentGame: this.state.musicData[k], countdownPlaying: true })
+    //Link der gerendert wird
+    this.setState({ video: "https://www.youtube.com/embed/" + this.state.musicData[k].songs[p].link + "?start=10&autoplay=1&showinfo=0&loop=1", currentGame: this.state.musicData[k], countdownPlaying: true })
     this.sleep(20000).then(() => {
 
-      //console.log(this.state.userGuess)
-      //console.log(this.state.currentGame.game)
+     //Punkt wird vergeben, wenn das eingebene Spiel gleich ist, wie das vom gerenderten Song
       if (this.state.userGuess == this.state.currentGame.game) {
         this.setState({ points: this.state.points + 1 })
       }
-      console.log("points: " + this.state.points)
+
+      //Alle Daten werden dementsprechend gesetzt; gamebefore ist für die Song info
       this.setState({ gameBefore: this.state.currentGame, songBefore: this.state.currentGame.songs[p].name, totalSongs: this.state.totalSongs + 1 })
       this.setState({ guessingRate: Math.round(((this.state.points / this.state.totalSongs) * 100 + Number.EPSILON) * 100) / 100 })
       this.setState({ iconcolor: 'grey', checkRemainingTime: true })
@@ -111,6 +99,7 @@ export default class ApiForm extends Component {
     })
   }
 
+  //Game info wird links am Bildschirm gerendert
   renderResult() {
     return (
       <div>
@@ -137,14 +126,13 @@ export default class ApiForm extends Component {
 
   onChangeDropdown = (e, { value }) => this.setState({ userGuess: value })
 
+  //Zeit wird mitten im Timer gerendert
   renderTime = ({ remainingTime }) => {
 
     if (remainingTime === 0) {
       return <div className="timer">Next song is loading...</div>;
     }
-    /*if(remainingTime === 0 && this.state.checkRemainingTime == true){
-      this.setState({countdownPlaying: false, checkRemainingTime: false})
-    }*/
+
 
     return (
       <div className="timer">
@@ -158,6 +146,7 @@ export default class ApiForm extends Component {
 
   render() {
 
+    //Info am Rand wird nur gerendert, sobald der erste Song auch durchgespielt wurde
     let renderResult
     if (this.state.gameBefore != '') {
 
@@ -172,12 +161,15 @@ export default class ApiForm extends Component {
           <Grid.Row columns={3}>
             <GridColumn></GridColumn>
             <GridColumn>
+              {/*Timer und Funtkionen für den Timer*/}
               <div className="timer-wrapper">
                 <CountdownCircleTimer
+                //Wird erst gestartet sobald die Song Daten von der API geladen wird
                   isPlaying={this.state.countdownPlaying}
                   duration={20}
                   colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
                   colorsTime={[10, 6, 3, 0]}
+                  //Sobald der Timer fertig ist, wird ein neuer Song geladen
                   onComplete={() => {
 
                     this.sleep(5000).then(() => {
@@ -253,6 +245,7 @@ export default class ApiForm extends Component {
 
 
 
+            {/*Unsichtbares Youtube Video */}
         <iframe width="0" height="0" src={this.state.video} title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
       </div>
     )

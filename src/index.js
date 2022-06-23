@@ -4,8 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
-import pkg from 'semantic-ui-react/package.json'
 
+//Imports der einzelnen Seiten
 import Navbar from "./Navbar";
 import Home from "./Sites/Home"
 import Game from "./Sites/Game"
@@ -24,6 +24,7 @@ document.head.appendChild(styleLink);
 export default function Routing() {
   return (       
       
+    //Router für die einzelnen Elemente
    <Router>
      <Navbar />
    <Routes> 

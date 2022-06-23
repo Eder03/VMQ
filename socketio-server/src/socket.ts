@@ -12,6 +12,7 @@ export default (httpServer) => {
 
   // });
 
+  //Gibt an, dass die Controller Klassen für die Verbindungen verwendet werden müssen
   useSocketServer(io, { controllers: [__dirname + "/api/controllers/*.ts"] });
 
   return io;

@@ -7,6 +7,8 @@ import {
 import { Socket, Server } from "socket.io";
 
 @SocketController()
+
+//OnConnect: Client Tritt dem Server bei
 export class MainController {
   @OnConnect()
   public onConnection(
@@ -14,9 +16,5 @@ export class MainController {
     @SocketIO() io: Server
   ) {
     console.log("New Socket connected: ", socket.id);
-
-    socket.on("custom_event", (data: any) => {
-      console.log("Data: ", data);
-    });
   }
 }

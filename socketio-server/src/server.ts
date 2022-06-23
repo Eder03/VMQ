@@ -10,6 +10,18 @@ var debug = require("debug")("socketio-server:server");
 import * as http from "http";
 import socketServer from "./socket";
 
+/*
+*
+*
+*
+*
+* Vorgefertigte Datei, für die Konfiguration für den Server
+*
+*
+*
+*
+*/
+
 /**
  * Get port from environment and store in Express.
  */

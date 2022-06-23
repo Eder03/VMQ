@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+//Url zu MongoDB Atlas
 const Db = process.env.ATLAS_URI;
 
 //MongoDB Connection mit der Datenbank URL in der.env Datei wird erstellt

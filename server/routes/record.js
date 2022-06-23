@@ -23,6 +23,7 @@ recordRoutes.route("/getAll").get(function (req, res) {
     });
 });
 
+//Alle Namen der Spiele wird zurückgegeben
 recordRoutes.route("/getGames").get(function (req, res) {
   let db_connect = dbo.getDb("VMQ");
   db_connect
@@ -55,20 +56,25 @@ recordRoutes.route("/addMusic").post(function (req, response) {
       approved: false
 
     };
+    //InsertOne
     db_connect.collection("Music").insertOne(musicObj, function (err, res) {
       if (err) throw err;
       response.json(res);
     });
   });
 
+  //Neues Songobjekt wird einem Spiel hinzugefügt
   recordRoutes.route("/update").post(function (req, response) {
     let db_connect = dbo.getDb();
+    //Daten der Datenbank
     let myquery = { game: req.body.game};
+    //Neues Songobjekt
     let newvalues = {
       $push: {
         songs: req.body.songs
       },
     };
+    //UpdateOne
     db_connect
       .collection("Music")
       .updateOne(myquery, newvalues, function (err, res) {
@@ -78,14 +84,17 @@ recordRoutes.route("/addMusic").post(function (req, response) {
       });
   });
 
+  //Approve all games
   recordRoutes.route("/approveGame").post(function (req, response) {
     let db_connect = dbo.getDb();
+    //Alle Spiele, wo approved false ist
     let myquery = { approved: false};
     let newvalues = {
       $set: {
         approved: true
       },
     };
+    //Update All
     db_connect
       .collection("Music")
       .updateMany(myquery, newvalues, function (err, res) {
@@ -95,8 +104,11 @@ recordRoutes.route("/addMusic").post(function (req, response) {
       });
   });
 
+  //Delete all unapproved games
   recordRoutes.route("/del").delete((req, response) => {
+
     let db_connect = dbo.getDb();
+    //Alle Spiele, wo approved false ist
     let myquery = { approved: false};
     db_connect.collection("Music").deleteMany(myquery, function (err, obj) {
       if (err) throw err;

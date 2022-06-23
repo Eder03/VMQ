@@ -13,35 +13,28 @@ export default class AddSong extends Component {
       this.onChangeLink = this.onChangeLink.bind(this);
       this.onChangeComposers = this.onChangeComposers.bind(this);
       this.onChangeDropdown = this.onChangeDropdown.bind(this);
-
-      //this.updateTable = this.updateTable.bind(this)
       this.onSubmit = this.onSubmit.bind(this);
 
-      //Deklaration der einzelnen Datenbank Variablen
+      //Deklaration der einzelnen Datenbank Variablen und anderer Variablen
       this.state = {
           musicData: [],
+          //Daten von der Datenbank werden in ein eigenes Objekt für das Dropdown gespeichert
           dropdownData: [],
-          dropdownOptions:[{
-            key: '',
-            text: '',
-            value: ''
-          }],
+          //Standard Form, damit das Dropdown es erkennt
+          dropdownOptions:[],
           game: '',
           songname: '',
           link:'',
           composers:'',
 
-
-
           songs: [
-            { id: 1, nr: 1, songname: '', link: '', approved: false },
          ],
          video: ""
 
       }
 
 
-
+//Einzelne Set Funktionen
   }
   onChangeSongName(e) {
     this.setState({ songname: e.target.value })
@@ -55,14 +48,20 @@ onChangeComposers(e){
   this.setState({composers: e.target.value})
 }
 
+
+//Funktion um die Tabelle zu aktualisieren, damit die richtigen Songs angezeigt werden
 onChangeDropdown(e) {
 
   this.setState((currentState) =>{
+    //Songs die angezeigt werden sollen
   const newSongs = [];
+  //Spiel das ausgewählt wird
   const game = e.target.textContent;
 
+  //For Schleife, die für jedes vorhandene Spiel Objekt ausgeführt wird, bis das ausgewählte gefunden wurde
   this.state.musicData.forEach((data) =>{
     if(data.game == game){
+      //For Schleife, die für jedes vorhandene Musik Objekt im ausgewählten Spiel ausgeführt wird
          data.songs.forEach((song, index) =>{
         newSongs.push({
           id: index+1,
@@ -75,6 +74,7 @@ onChangeDropdown(e) {
     }
   })
   return{
+    //Um die Alten Daten zu behalten, falls bei der Auswahl eines neuen Spiels ein Fehler aufgetreten ist
     ...currentState,
     game,
     songs: newSongs,
@@ -83,21 +83,21 @@ onChangeDropdown(e) {
 }
 
 
-
+//Standard Funktion; wird aufgerufen bevor/während die Seite geladen wird
   componentDidMount(){
+    //Get Request für alle Daten
     axios.get('https://vmq-server.herokuapp.com/getAll')
     .then(res => {
+      //Alle Daten werden in ein Objekt abgespeichert
         this.setState({ musicData: res.data });
         for(var i = 0; i < this.state.musicData.length; i++){
+          //Namen der Spiele wird in DropdownData gespeichert
           this.state.dropdownData.push(this.state.musicData[i].game)
 
         }
         
-
-        this.state.dropdownOptions[0].key = this.state.dropdownData[0]
-        this.state.dropdownOptions[0].text = this.state.dropdownData[0]
-        this.state.dropdownOptions[0].value = this.state.dropdownData[0]
-        for(var j = 1; j < this.state.dropdownData.length; j++){
+        //DropdownOptions wird in die richtige Form gebracht und alle Daten hineingegeben
+        for(var j = 0; j < this.state.dropdownData.length; j++){
           this.state.dropdownOptions.push({key: this.state.dropdownData[j], text: this.state.dropdownData[j], value: this.state.dropdownData[j]})
         }
 
@@ -114,6 +114,7 @@ onChangeDropdown(e) {
   
 
 
+  //Daten der Tabelle wird für das richtige Spiel gerendert
   renderTableData() {
     return this.state.songs.map((song, index) => {
        var { id, nr, songname, link, approved } = song 
@@ -146,6 +147,7 @@ onChangeDropdown(e) {
         }
       
   };
+  //Update Endpoint wird aufgerufen und die eingegebenen Daten übergeben
   axios.post('https://vmq-server.herokuapp.com/update', songObject)
           .then((res) => {
               console.log(res.data)
@@ -204,7 +206,6 @@ onChangeDropdown(e) {
                 <Form.Button onClick={this.onSubmit} content='Submit' color='green'/>
                 </Grid.Column>
                 
-                {/*<Button color='instagram' onClick={this.updateTable}> Update Table</Button>*/}
               </Grid.Row>
             </Grid>
           </Form>

@@ -13,39 +13,30 @@ export default class ApiForm extends Component {
 
       this.onSubmit = this.onSubmit.bind(this);
 
-      //Initialisierung der Funktionen um den Input zu akzeptieren
-
-      //Deklaration der einzelnen Datenbank Variablen
+      //Deklaration der einzelnen Datenbank Variablen und weiterer Variablen
       this.state = {
           userGuess:'',
           musicData: {},
           dropdownData: [],
           video:'',
-      dropdownOptions: [{
-        key: '',
-        text: '',
-        value: ''
-      }],
+      dropdownOptions: [],
+      //Lobbyname für den Multiplayer, derzeit statisch; später einzugeben
       roomName: "public_server",
       points: 0
       }
   }
 
- /*connect = () =>{
-    const socket = io("http://localhost:9000");
-    socket.on("connect", () =>{
 
-        socket.emit("custom_event", {name: "Alex"})
-    })
-
-}*/
+  //Client probiert den gestarteten Socket zu joinen
   connectSocket = async () =>{
       const socket = await socketService.connect("http://localhost:9000").catch((err)=>{
         console.log("Error: ", err)
       });
   }
 
+  //Es wird dem spzifischen Multiplayer Raum beigetreten
   joinRoom = async () =>{
+    //Server
       const socket = socketService.socket;
       if(!this.state.roomName || this.state.roomName.trim() === "" || !socket) return;
 
@@ -62,17 +53,16 @@ export default class ApiForm extends Component {
       for (var i = 0; i < this.state.musicData.length; i++) {
         this.state.dropdownData.push(this.state.musicData[i].game)
       }
-      this.state.dropdownOptions[0].key = this.state.dropdownData[0]
-      this.state.dropdownOptions[0].text = this.state.dropdownData[0]
-      this.state.dropdownOptions[0].value = this.state.dropdownData[0]
-      for (var j = 1; j < this.state.dropdownData.length; j++) {
+
+      for (var j = 0; j < this.state.dropdownData.length; j++) {
         this.state.dropdownOptions.push({ key: this.state.dropdownData[j], text: this.state.dropdownData[j], value: this.state.dropdownData[j] })
       }
     })
     .catch(function (error) {
       console.log(error);
     })
-    //this.connect();
+    
+    //Beim betreten der Multiplayer Seite wird bereits dem Server und der Lobby gejoint; Später mittels Button/Form etc. geregelt
     this.connectSocket()
     this.joinRoom()
     
@@ -84,12 +74,13 @@ export default class ApiForm extends Component {
   }
 
   onChangeDropdown = (e, { value }) => this.setState({ userGuess: value })
+
+  //TestFunktion um zu schauen, ob die Kommunikation zwischen Server und Client funktioniert
   onSubmit(e){
 
     clearInterval(this.timerinterval)
     this.timerinterval = 0;
     e.preventDefault();
-    console.log("render")
     this.getSong()
     this.timerinterval = setInterval(this.getSong, 20000)
     
@@ -97,12 +88,17 @@ export default class ApiForm extends Component {
 
  timerinterval = 0;
 
+ //TestFunktion um zu schauen, ob die Kommunikation zwischen Server und Client funktioniert
  getSong(){
+  //In gameservice sind alle Funktionen, um das Online Spiel zu regeln
+  //Schickt dem Server die Anfrage einen neuen Song zu rendern
   gameService.updateSong(socketService.socket);
+  //Neuer Song vom Server wird gerendert
   gameService.getSong(socketService.socket, (link) =>{
     console.log("React: ", link)
     this.setState({video: link})
     console.log("state: ",this.state.video)
+    //Punkt wird dem Client hinzugefügt, der den Song richtig erraten hat; Serverseitig gelöst, damit später alle Clients die Punkte von anderen sehen können
     gameService.check_input(socketService.socket, this.state.userGuess)
     gameService.add_point(socketService.socket, (point) =>{
       console.log("add point: ",point)

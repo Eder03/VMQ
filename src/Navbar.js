@@ -11,7 +11,7 @@ export default class MenuExampleContentProp extends Component {
     const { activeItem } = this.state
 
     return (
-      
+      //Navbar mit Elementen
     <Menu attached='top' >
       <Menu.Item as={Link} to='/'
           

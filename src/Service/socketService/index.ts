@@ -4,7 +4,9 @@ import { Socket, io } from "socket.io-client";
 class SocketService{
 
 
-    public socket: Socket | null = null
+    //public socket, damit der Client darauf zugreifen kann
+    public socket: Socket
+    //In dieser Funktion wird der Client dem Socket hinzugefügt
     public connect(url: string): Promise<Socket<any>>{
         return new Promise((rs, rj) =>{
             this.socket = io(url,{ rejectUnauthorized: false })
@@ -12,6 +14,7 @@ class SocketService{
             if(!this.socket){
                 return rj();
             }
+            //Wenn vom server "connect" zurückgegeben wird
             this.socket.on("connect", () =>{
                 rs(this.socket)
 

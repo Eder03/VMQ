@@ -70,8 +70,6 @@ onChangeDeveloper(e){
 
 //Funktion für Submit Button
   onSubmit(e) {
-    //
-      e.preventDefault()
       //Music Collection Objekt
       const musicObject = {
           game: this.state.game,
@@ -80,6 +78,7 @@ onChangeDeveloper(e){
             {
               name: this.state.songname,
               link: this.state.link,
+              //Wird nach einem Beistrich in 2 verschiedene String geteilt
               composers: this.state.composers.split(", "),
               songapproved: false
             }
