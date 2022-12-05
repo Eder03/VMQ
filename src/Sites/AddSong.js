@@ -36,6 +36,7 @@ export default class AddSong extends Component {
 
 //Einzelne Set Funktionen
   }
+  
   onChangeSongName(e) {
     this.setState({ songname: e.target.value })
 }
@@ -86,7 +87,7 @@ onChangeDropdown(e) {
 //Standard Funktion; wird aufgerufen bevor/während die Seite geladen wird
   componentDidMount(){
     //Get Request für alle Daten
-    axios.get('https://vmq-production.up.railway.app/getAll')
+    axios.get('https://vmq.onrender.com/getAll')
     .then(res => {
       //Alle Daten werden in ein Objekt abgespeichert
         this.setState({ musicData: res.data });
@@ -101,7 +102,7 @@ onChangeDropdown(e) {
           this.state.dropdownOptions.push({key: this.state.dropdownData[j], text: this.state.dropdownData[j], value: this.state.dropdownData[j]})
         }
 
-        
+       
     })
     .catch(function (error) {
         console.log(error);
@@ -148,7 +149,7 @@ onChangeDropdown(e) {
       
   };
   //Update Endpoint wird aufgerufen und die eingegebenen Daten übergeben
-  axios.post('https://vmq-production.up.railway.app/update', songObject)
+  axios.post('https://vmq.onrender.com/update', songObject)
           .then((res) => {
               console.log(res.data)
           }).catch((error) => {

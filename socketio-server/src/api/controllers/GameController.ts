@@ -39,7 +39,7 @@ public update_Song(@SocketIO() io: Server, @ConnectedSocket() socket: Socket){
     const gameRoom = this.getSocketGameRoom(socket);
     
     //Get Request
-    axios.get('https://vmq-production.up.railway.app/getAll')
+    axios.get('https://vmq.onrender.com/getAll')
       .then(res => {
         var k = Math.floor(Math.random() * res.data.length);
         var p = Math.floor(Math.random() * res.data[k].songs.length);

@@ -39,7 +39,7 @@ export default class ApiForm extends Component {
     //Random Skin wird gesetzt
     this.setState({ skin: "./skins/" + Math.floor(Math.random() * (4 - 1) + 1) + ".png" })
     //Get Request für alle Daten
-    axios.get('https://vmq-production.up.railway.app/getAll')
+    axios.get('https://vmq.onrender.com/getAll')
       .then(res => {
         this.setState({ musicData: res.data });
 
