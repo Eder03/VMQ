@@ -89,7 +89,7 @@ onChangeDeveloper(e){
           developer: this.state.developer
       };
       //Aufruf des POST Endpoints
-      axios.post('https://vmq-server.herokuapp.com/addMusic', musicObject)
+      axios.post('https://vmq-production.up.railway.app/addMusic', musicObject)
           .then((res) => {
               console.log(res.data)
           }).catch((error) => {

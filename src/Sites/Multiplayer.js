@@ -46,7 +46,7 @@ export default class ApiForm extends Component {
 
   }
   componentDidMount(){
-    axios.get('https://vmq-server.herokuapp.com/getAll')
+    axios.get('https://vmq-production.up.railway.app/getAll')
     .then(res => {
       this.setState({ musicData: res.data });
 

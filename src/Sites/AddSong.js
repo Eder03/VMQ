@@ -86,7 +86,7 @@ onChangeDropdown(e) {
 //Standard Funktion; wird aufgerufen bevor/während die Seite geladen wird
   componentDidMount(){
     //Get Request für alle Daten
-    axios.get('https://vmq-server.herokuapp.com/getAll')
+    axios.get('https://vmq-production.up.railway.app/getAll')
     .then(res => {
       //Alle Daten werden in ein Objekt abgespeichert
         this.setState({ musicData: res.data });
@@ -148,7 +148,7 @@ onChangeDropdown(e) {
       
   };
   //Update Endpoint wird aufgerufen und die eingegebenen Daten übergeben
-  axios.post('https://vmq-server.herokuapp.com/update', songObject)
+  axios.post('https://vmq-production.up.railway.app/update', songObject)
           .then((res) => {
               console.log(res.data)
           }).catch((error) => {
