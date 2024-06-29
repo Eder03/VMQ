@@ -25,10 +25,12 @@ const io = new Server(httpServer, {
 let musicData = [];
 let clients = [];
 const countdownDuration = 20;
-const pauseDuration = 5;
+const pauseDuration = 7;
 let timer = null;
 let currentRound = 0;
 const maxRounds = 20;
+
+let playedSongs = [];
 
 const port = process.env.PORT || 5002;
 
@@ -42,15 +44,35 @@ httpServer.listen(port, () => {
 });
 
 function sendSelectedSong() {
-  const k = Math.floor(Math.random() * musicData.length);
-  const p = Math.floor(Math.random() * musicData[k].songs.length);
-  const selectedSong = {
-    video: `https://www.youtube.com/embed/${musicData[k].songs[p].link}?start=10&autoplay=1&showinfo=0&loop=1`,
-    currentGame: musicData[k],
-    currentSong: musicData[k].songs[p]
-  };
+  if (playedSongs.length === musicData.reduce((total, game) => total + game.songs.length, 0)) {
+    console.log('All songs have been played.');
+    return;
+  }
+
+  let selectedSong;
+  let isUnique = false;
+
+  while (!isUnique) {
+    const k = Math.floor(Math.random() * musicData.length);
+    const p = Math.floor(Math.random() * musicData[k].songs.length);
+    const songId = `${musicData[k].name}_${musicData[k].songs[p].link}`; // Create a unique identifier for the song
+
+    if (!playedSongs.includes(songId)) {
+      selectedSong = {
+        video: `https://www.youtube.com/embed/${musicData[k].songs[p].link}?start=10&autoplay=1&showinfo=0&loop=1`,
+        currentGame: musicData[k],
+        currentSong: musicData[k].songs[p]
+      };
+      playedSongs.push(songId); // Add the song to the played list
+      isUnique = true;
+    }
+  }
 
   io.emit('gameStarted', selectedSong, maxRounds);
+}
+
+function resetPlayedSongs() {
+  playedSongs = [];
 }
 
 function updateConnectedClients() {
@@ -103,7 +125,7 @@ io.on('connection', (socket) => {
   console.log('Client connected');
 
   socket.on('setUsername', (username, points) => {
-    const skin = "https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins/" + Math.floor(Math.random() * (22 - 1) + 1) + ".gif";
+    const skin = "https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins/" + Math.floor(Math.random() * (24 - 1) + 1) + ".gif";
     clients.push({ id: socket.id, username: username, points: points, skin: skin });
     updateConnectedClients();
   });
@@ -117,6 +139,7 @@ io.on('connection', (socket) => {
   socket.on('startGame', () => {
     console.log("start game");
     currentRound = 0;
+    resetPlayedSongs();
     sendSelectedSong();
     startTimer();
   });
