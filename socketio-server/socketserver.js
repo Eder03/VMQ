@@ -2,9 +2,21 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const axios = require("axios");
-const server = http.createServer(app);
+
+
+
+
+const Koa = require("koa");
+const { createServer } = require("http");
 const { Server } = require("socket.io");
-const io = new Server(server, {
+
+const server = new Koa();
+
+const httpServer = createServer(app.callback());
+
+
+
+const io = new Server(httpServer, {
   cors: {
     origin: "*",
   },
@@ -20,7 +32,7 @@ const maxRounds = 20;
 
 const port = process.env.PORT || 5002;
 
-server.listen(port, () => {
+httpServer.listen(port, () => {
   console.log('listening on ' + port);
 
   axios.get('https://vmq.onrender.com/getAll')

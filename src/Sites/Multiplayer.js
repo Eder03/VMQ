@@ -47,7 +47,7 @@ export default class ApiForm extends Component {
       winnerInfo: ''
     };
 
-    this.socket = io('https://vmq-server.onrender.com:5001');
+    this.socket = io('http://vmq-server-alpha.onrender.com:5001');
     this.startGame = this.startGame.bind(this);
     this.handleUsernameSubmit = this.handleUsernameSubmit.bind(this);
   }
