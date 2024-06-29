@@ -18,8 +18,10 @@ let timer = null;
 let currentRound = 0;
 const maxRounds = 20;
 
-server.listen(5001, () => {
-  console.log('listening on *:5001');
+const port = process.env.PORT || 5002;
+
+server.listen(port, () => {
+  console.log('listening on ' + port);
 
   axios.get('https://vmq.onrender.com/getAll')
     .then(res => {
