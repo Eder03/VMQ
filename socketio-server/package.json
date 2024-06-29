@@ -4,7 +4,9 @@
   "description": "server",
   "main": "socketserver.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm i",
+    "start": "node socketserver.js"
   },
   "author": "",
   "license": "ISC",
