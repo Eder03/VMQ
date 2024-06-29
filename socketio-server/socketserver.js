@@ -12,7 +12,7 @@ const { Server } = require("socket.io");
 
 const server = new Koa();
 
-const httpServer = createServer(app.callback());
+const httpServer = createServer(server.callback());
 
 
 
