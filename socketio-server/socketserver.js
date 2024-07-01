@@ -121,9 +121,9 @@ function announceWinner() {
 io.on('connection', (socket) => {
   console.log('Client connected');
 
-  socket.on('setUsername', (username, points) => {
-    const skin = "https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins/" + Math.floor(Math.random() * (24 - 1) + 1) + ".gif";
-    clients.push({ id: socket.id, username: username, points: points, skin: skin });
+  socket.on('setUsername', (username, selectedSkin) => {
+    const skin = selectedSkin || "https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins/1.gif"; // Standard-Skin, falls keiner ausgewählt wurde
+    clients.push({ id: socket.id, username: username, points: 0, skin: skin });
     updateConnectedClients();
   });
 

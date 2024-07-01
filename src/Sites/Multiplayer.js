@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Form, Grid, Image, Modal, Button, Label, Input, Segment, Icon } from 'semantic-ui-react';
+import { Card, Form, Grid, Image, Modal, Button, Label, Input, Segment, Icon, Pagination } from 'semantic-ui-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
@@ -46,11 +46,17 @@ export default class ApiForm extends Component {
       winners: [],
       winnerInfo: '',
       message: '',
-      chatMessages: []
+      chatMessages: [],
+      selectedSkin: '',
+      skins: [],
+      activePage: 1,
+      itemsPerPage: 6
     };
 
+    //this.socket = io('localhost:5002');
     this.socket = io('https://vmq-server.onrender.com');
     this.startGame = this.startGame.bind(this);
+  
     this.handleUsernameSubmit = this.handleUsernameSubmit.bind(this);
   }
 
@@ -80,6 +86,25 @@ export default class ApiForm extends Component {
       .catch(function (error) {
         console.log(error);
       });
+
+
+      axios.get('https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins.json')
+      .then(res => {
+        this.setState({ skins: res.data });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+
+
+
+
+
+
+
+
+
 
     this.socket.on('updatePoints', (clients) => {
       this.setState({ connectedClients: clients });
@@ -228,6 +253,8 @@ export default class ApiForm extends Component {
       this.handleSendMessage();
     }
   };
+
+  
   
 
   startTimerAnimation = () => {
@@ -288,10 +315,11 @@ export default class ApiForm extends Component {
 
   
 
-  handleUsernameSubmit(e) {
+  handleUsernameSubmit = () => {
+    const { username, selectedSkin } = this.state;
     this.setState({ showUsernamePopup: false });
-    this.socket.emit('setUsername', this.state.username, this.state.points);
-  }
+    this.socket.emit('setUsername', username, selectedSkin);
+  };
 
   onChangeDropdown = (e, { value }) => this.setState({ userGuess: value });
 
@@ -350,13 +378,21 @@ export default class ApiForm extends Component {
       </div>
     );
   }
+
+  handleSkinSelect = (skinUrl) => {
+    this.setState({ selectedSkin: skinUrl });
+  };
+
+  handlePageChange = (e, { activePage }) => {
+    this.setState({ activePage });
+  };
   
   
   
   
 
   render() {
-    const { message, chatMessages, winners, winnerInfo, guesses, clients, points, countdownPlaying, remainingTime, loadingNextSong, selectedsong, connectedClients, showModal, winnerUsernames, winnerPoints, circleProgress, isPaused, roundCount, maxRounds } = this.state;
+    const { username, activePage, itemsPerPage, skins, selectedSkin, message, chatMessages, winners, winnerInfo, guesses, clients, points, countdownPlaying, remainingTime, loadingNextSong, selectedsong, connectedClients, showModal, winnerUsernames, winnerPoints, circleProgress, isPaused, roundCount, maxRounds } = this.state;
   
     const svgStyle = {
       width: '100px',
@@ -394,6 +430,10 @@ export default class ApiForm extends Component {
       zIndex: 1000,
       width: '300px',
     };
+
+    const indexOfLastItem = activePage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentSkins = skins.slice(indexOfFirstItem, indexOfLastItem);
   
     let renderResult;
     if (this.state.gameBefore != '') {
@@ -403,24 +443,57 @@ export default class ApiForm extends Component {
     if (this.state.showUsernamePopup) {
       return (
         <Modal open={true} size="tiny">
-          <Modal.Header>Bitte geben Sie Ihren Benutzernamen ein:</Modal.Header>
-          <Modal.Content>
-            <Form>
-              <Form.Field>
-                <Input
-                  placeholder="Benutzername"
-                  value={this.state.username}
-                  onChange={(e) => this.setState({ username: e.target.value })}
-                />
-              </Form.Field>
-            </Form>
-          </Modal.Content>
-          <Modal.Actions>
+        <Modal.Header>Bitte wählen Sie einen Skin und geben Sie Ihren Benutzernamen ein:</Modal.Header>
+        <Modal.Content>
+          <Grid centered columns={3}>
+            <Grid.Row>
+              {currentSkins.map((skin, index) => (
+                <Grid.Column key={index}>
+                  <Card
+                    onClick={() => this.handleSkinSelect(skin.url)}
+                    style={{
+                      cursor: 'pointer',
+                      border: selectedSkin === skin.url ? '2px solid green' : 'none',
+                      height: '200px', // Feste Höhe für die Karte
+                      width: '250px', // Feste Breite für die Karte
+                    }}
+                  >
+                    <div style={{ height: '150px', overflow: 'hidden' }}>
+                      <Image src={skin.url} style={{ width: '250px', height: '150px', objectFit: 'cover' }} />
+                    </div>
+                    <Card.Content>
+                      <Card.Header>{skin.name}</Card.Header>
+                      <Card.Description>{skin.description}</Card.Description>
+                    </Card.Content>
+                  </Card>
+                </Grid.Column>
+              ))}
+            </Grid.Row>
+          </Grid>
+          <Grid centered style={{ marginTop: '20px' }}>
+            <Pagination
+              totalPages={Math.ceil(skins.length / itemsPerPage)}
+              activePage={activePage}
+              onPageChange={this.handlePageChange}
+              firstItem={null}
+              lastItem={null}
+              style={{ textAlign: 'center', margin: '0', padding: '0' }} // CSS für die Pagination
+            />
+          </Grid>
+          <Form style={{ marginTop: '30px' }}>
+            <Form.Field>
+              <Input
+                placeholder="Benutzername"
+                value={username}
+                onChange={(e) => this.setState({ username: e.target.value })}
+              />
+            </Form.Field>
             <Button primary onClick={this.handleUsernameSubmit}>
               Bestätigen
             </Button>
-          </Modal.Actions>
-        </Modal>
+          </Form>
+        </Modal.Content>
+      </Modal>
       );
     } else {
       if (this.state.connectionError) {
