@@ -176,5 +176,10 @@ socket.on('startGameAndHideButton', () => {
   io.emit('hideStartButton'); // An alle Clients senden
 });
 
+ // Chat-Nachrichten
+ socket.on('sendMessage', (message) => {
+  io.emit('receiveMessage', message);
+});
+
 
 });

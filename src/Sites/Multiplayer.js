@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Form, Grid, Image, Modal, Button, Label, Input, Segment } from 'semantic-ui-react';
+import { Card, Form, Grid, Image, Modal, Button, Label, Input, Segment, Icon } from 'semantic-ui-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
@@ -44,13 +44,25 @@ export default class ApiForm extends Component {
       guesses:{},
       showStartButton: true, 
       winners: [],
-      winnerInfo: ''
+      winnerInfo: '',
+      message: '',
+      chatMessages: []
     };
 
-    this.socket = io('https://vmq-server.onrender.com');
+    this.socket = io('http://192.168.0.229:5002');
     this.startGame = this.startGame.bind(this);
     this.handleUsernameSubmit = this.handleUsernameSubmit.bind(this);
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.chatMessages.length !== this.state.chatMessages.length) {
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom = () => {
+    this.messagesEnd.scrollIntoView({ behavior: 'smooth' });
+  };
 
   componentDidMount() {
     axios.get('https://vmq.onrender.com/getAll')
@@ -151,10 +163,10 @@ export default class ApiForm extends Component {
     });
 
     this.socket.on('nextSongLoading', () => {
-      this.setState({ remainingTime: 5 });
+      this.setState({ remainingTime: 7 });
       setTimeout(() => {
         this.setState({ countdownPlaying: true });
-      }, 5000);
+      }, 7000);
     });
 
     this.socket.on('updateGuesses', ({ username, guess, isCorrect }) => {
@@ -171,6 +183,12 @@ export default class ApiForm extends Component {
 
     this.socket.on('resetPoints', () => {
       this.resetPoints();
+    });
+
+    this.socket.on('receiveMessage', (message) => {
+      this.setState(prevState => ({
+        chatMessages: [...prevState.chatMessages, message]
+      }));
     });
   }
 
@@ -193,6 +211,22 @@ export default class ApiForm extends Component {
 
   resetDropdown = () => {
     this.setState({ userGuess: '' });
+  };
+
+  handleSendMessage = () => {
+    const message = { username: this.state.username, message: this.state.message };
+    this.socket.emit('sendMessage', message);
+    this.setState({ message: '' });
+  };
+
+  handleMessageChange = (e) => {
+    this.setState({ message: e.target.value });
+  };
+
+  handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      this.handleSendMessage();
+    }
   };
   
 
@@ -322,7 +356,7 @@ export default class ApiForm extends Component {
   
 
   render() {
-    const { winners, winnerInfo, guesses, clients, points, countdownPlaying, remainingTime, loadingNextSong, selectedsong, connectedClients, showModal, winnerUsernames, winnerPoints, circleProgress, isPaused, roundCount, maxRounds } = this.state;
+    const { message, chatMessages, winners, winnerInfo, guesses, clients, points, countdownPlaying, remainingTime, loadingNextSong, selectedsong, connectedClients, showModal, winnerUsernames, winnerPoints, circleProgress, isPaused, roundCount, maxRounds } = this.state;
   
     const svgStyle = {
       width: '100px',
@@ -480,6 +514,26 @@ export default class ApiForm extends Component {
             </Grid>
   
             <iframe id="youtube-video" width="0" height="0" src={this.state.selectedsong.video} title="YouTube video player" frameBorder="0" allow="autoplay; encrypted-media;" allowFullScreen></iframe>
+
+            <Grid.Row style={{ position: 'fixed', bottom: '0', right: '0', width: '300px', margin: '20px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: 'white' }}>
+  <div style={{ maxHeight: '150px', overflowY: 'auto', padding: '10px' }}>
+    {this.state.chatMessages.map((msg, index) => (
+      <div key={index}><strong>{msg.username}:</strong> {msg.message}</div>
+    ))}
+    <div ref={(el) => { this.messagesEnd = el; }}></div>
+  </div>
+  <Form onSubmit={this.handleSendMessage} style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+    <Input
+      placeholder='Nachricht...'
+      value={this.state.message}
+      onChange={(e) => this.setState({ message: e.target.value })}
+      style={{ flex: '1' }}
+    />
+    <Button type='submit' icon>
+      <Icon name='send' />
+    </Button>
+  </Form>
+</Grid.Row>
   
             <Modal open={showModal} onClose={() => this.setState({ showModal: false })}>
               <Modal.Header>Spiel beendet</Modal.Header>
