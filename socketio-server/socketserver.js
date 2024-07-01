@@ -37,10 +37,7 @@ const port = process.env.PORT || 5002;
 httpServer.listen(port, () => {
   console.log('listening on ' + port);
 
-  axios.get('https://vmq.onrender.com/getAll')
-    .then(res => {
-      musicData = res.data;
-    });
+  
 });
 
 function sendSelectedSong() {
@@ -139,6 +136,13 @@ io.on('connection', (socket) => {
   socket.on('startGame', () => {
     console.log("start game");
     currentRound = 0;
+
+    axios.get('https://vmq.onrender.com/getAll')
+    .then(res => {
+      musicData = res.data;
+    });
+
+    
     resetPlayedSongs();
     sendSelectedSong();
     startTimer();
