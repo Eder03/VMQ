@@ -49,7 +49,7 @@ export default class ApiForm extends Component {
       chatMessages: []
     };
 
-    this.socket = io('http://192.168.0.229:5002');
+    this.socket = io('https://vmq-server.onrender.com');
     this.startGame = this.startGame.bind(this);
     this.handleUsernameSubmit = this.handleUsernameSubmit.bind(this);
   }
