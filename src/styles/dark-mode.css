@@ -1,0 +1,43 @@
+/* src/styles/dark-mode.css */
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  .dark-mode .ui.segment {
+    background-color: #1e1e1e;
+  }
+  
+  .dark-mode .ui.card, .dark-mode .ui.cards>.card {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  
+  .dark-mode .ui.input>input {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  
+  .dark-mode .ui.form .field>label {
+    color: #ffffff;
+  }
+  
+  .dark-mode .ui.dropdown .menu>.item {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  
+  .dark-mode .ui.button {
+    background-color: #333333;
+    color: #ffffff;
+  }
+  
+  .dark-mode .ui.label {
+    background-color: #333333;
+    color: #ffffff;
+  }
+  
+  /* Add more styles as needed for other components */
+  

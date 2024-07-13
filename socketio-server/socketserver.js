@@ -1,24 +1,18 @@
 const express = require('express');
 const app = express();
 const http = require('http');
-const axios = require("axios");
+const axios = require('axios');
 
-
-
-
-const Koa = require("koa");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
+const Koa = require('koa');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 
 const server = new Koa();
-
 const httpServer = createServer(server.callback());
-
-
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: '*',
   },
 });
 
@@ -36,167 +30,211 @@ const port = process.env.PORT || 5002;
 
 httpServer.listen(port, () => {
   console.log('listening on ' + port);
-
-  
 });
 
 function sendSelectedSong() {
-  // Überprüfen, ob alle Songs bereits gespielt wurden
-  const totalSongs = musicData.reduce((total, game) => total + game.songs.length, 0);
-  if (playedSongs.length === totalSongs) {
-    console.log('All songs have been played.');
-    return;
-  }
-
-  let selectedSong;
-  let isUnique = false;
-
-  while (!isUnique) {
-    // Erstellen einer Liste aller Songs
-    const allSongs = [];
-    musicData.forEach(game => {
-      game.songs.forEach(song => {
-        allSongs.push({ game, song });
-      });
-    });
-
-    console.log(allSongs)
-
-    // Zufälligen Song aus der Liste auswählen
-    const randomIndex = Math.floor(Math.random() * allSongs.length);
-    const { game, song } = allSongs[randomIndex];
-    const songId = `${game.name}_${song.link}`;
-
-    if (!playedSongs.includes(songId)) {
-      selectedSong = {
-        video: `https://www.youtube.com/embed/${song.link}?start=10&autoplay=1&showinfo=0&loop=1`,
-        currentGame: game,
-        currentSong: song
-      };
-      playedSongs.push(songId); // Song zur Liste der gespielten Songs hinzufügen
-      isUnique = true;
+  try {
+    const totalSongs = musicData.reduce((total, game) => total + game.songs.length, 0);
+    if (playedSongs.length === totalSongs) {
+      console.log('All songs have been played.');
+      return;
     }
-  }
 
-  io.emit('gameStarted', selectedSong, maxRounds);
+    let selectedSong;
+    let isUnique = false;
+
+    while (!isUnique) {
+      const allSongs = [];
+      musicData.forEach(game => {
+        game.songs.forEach(song => {
+          allSongs.push({ game, song });
+        });
+      });
+
+      const randomIndex = Math.floor(Math.random() * allSongs.length);
+      const { game, song } = allSongs[randomIndex];
+      const songId = `${game.name}_${song.link}`;
+
+      if (!playedSongs.includes(songId)) {
+        selectedSong = {
+          video: `https://www.youtube.com/embed/${song.link}?start=10&autoplay=1&showinfo=0&loop=1`,
+          currentGame: game,
+          currentSong: song
+        };
+        playedSongs.push(songId);
+        isUnique = true;
+      }
+    }
+
+    io.emit('gameStarted', selectedSong, maxRounds);
+  } catch (error) {
+    console.log('Error in sendSelectedSong:', error);
+  }
 }
 
 function resetPlayedSongs() {
-  playedSongs = [];
+  try {
+    playedSongs = [];
+  } catch (error) {
+    console.log('Error in resetPlayedSongs:', error);
+  }
 }
 
 function updateConnectedClients() {
-  io.emit('updateClients', clients);
+  try {
+    io.emit('updateClients', clients);
+  } catch (error) {
+    console.log('Error in updateConnectedClients:', error);
+  }
 }
 
 function startTimer() {
-  if (timer) {
-    clearInterval(timer);
-  }
-  let remainingTime = countdownDuration;
-  io.emit('startTimer', { remainingTime });
-
-  timer = setInterval(() => {
-    remainingTime--;
-    io.emit('updateTimer', { remainingTime });
-
-    if (remainingTime <= 0) {
+  try {
+    if (timer) {
       clearInterval(timer);
-      io.emit('timerFinished');
-      currentRound++;
-
-      if (currentRound < maxRounds) {
-        setTimeout(() => {
-          io.emit('nextSongLoading');
-          setTimeout(() => {
-            sendSelectedSong();
-            startTimer();
-          }, pauseDuration * 1000);
-        }, 0);
-      } else {
-        setTimeout(()=>{
-          announceWinner();
-        }, 500
-        )
-        
-      }
     }
-  }, 1000);
+    let remainingTime = countdownDuration;
+    io.emit('startTimer', { remainingTime });
+
+    timer = setInterval(() => {
+      remainingTime--;
+      io.emit('updateTimer', { remainingTime });
+
+      if (remainingTime <= 0) {
+        clearInterval(timer);
+        io.emit('timerFinished');
+        currentRound++;
+
+        if (currentRound < maxRounds) {
+          setTimeout(() => {
+            io.emit('nextSongLoading');
+            setTimeout(() => {
+              sendSelectedSong();
+              startTimer();
+            }, pauseDuration * 1000);
+          }, 0);
+        } else {
+          setTimeout(() => {
+            announceWinner();
+          }, 500);
+        }
+      }
+    }, 1000);
+  } catch (error) {
+    console.log('Error in startTimer:', error);
+  }
 }
 
 function announceWinner() {
-  const allPoints = clients.map(client => client.points);
-  const maxPoints = Math.max(...allPoints);
-  const winners = clients.filter(client => client.points === maxPoints);
-  io.emit('winnerAnnounced', winners);
+  try {
+    const allPoints = clients.map(client => client.points);
+    const maxPoints = Math.max(...allPoints);
+    const winners = clients.filter(client => client.points === maxPoints);
+    io.emit('winnerAnnounced', winners);
+  } catch (error) {
+    console.log('Error in announceWinner:', error);
+  }
 }
 
 io.on('connection', (socket) => {
   console.log('Client connected');
 
   socket.on('setUsername', (username, selectedSkin) => {
-    const skin = selectedSkin || "https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins/1.gif"; // Standard-Skin, falls keiner ausgewählt wurde
-    clients.push({ id: socket.id, username: username, points: 0, skin: skin });
-    updateConnectedClients();
+    try {
+      const skin = selectedSkin || "https://raw.githubusercontent.com/Eder03/vmq_skins/main/skins/1.gif";
+      clients.push({ id: socket.id, username: username, points: 0, skin: skin });
+      updateConnectedClients();
+    } catch (error) {
+      console.log('Error in setUsername:', error);
+    }
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
-    clients = clients.filter(client => client.id !== socket.id);
-    updateConnectedClients();
+    try {
+      console.log('Client disconnected');
+      clients = clients.filter(client => client.id !== socket.id);
+      updateConnectedClients();
+    } catch (error) {
+      console.log('Error in disconnect:', error);
+    }
   });
 
-  socket.on('startGame', () => {
-    console.log("start game");
-    currentRound = 0;
+  socket.on('startGame', async () => {
+    try {
+      console.log('start game');
+      currentRound = 0;
 
-    axios.get('https://vmq.onrender.com/getAll')
-    .then(res => {
+      const res = await axios.get('https://vmq.onrender.com/getAll');
       musicData = res.data;
-    });
 
-    
-    resetPlayedSongs();
-    sendSelectedSong();
-    startTimer();
+      resetPlayedSongs();
+      sendSelectedSong();
+      startTimer();
+    } catch (error) {
+      console.log('Error in startGame:', error);
+    }
   });
 
   socket.on('sendPoints', ({ points }) => {
-    const clientId = socket.id;
-    const clientIndex = clients.findIndex(client => client.id === clientId);
-    if (clientIndex !== -1) {
-      clients[clientIndex].points = points;
-      io.emit('updatePoints', clients);
+    try {
+      const clientId = socket.id;
+      const clientIndex = clients.findIndex(client => client.id === clientId);
+      if (clientIndex !== -1) {
+        clients[clientIndex].points = points;
+        io.emit('updatePoints', clients);
+      }
+    } catch (error) {
+      console.log('Error in sendPoints:', error);
     }
   });
 
   socket.on('loadNextSong', () => {
-    sendSelectedSong();
-    startTimer();
+    try {
+      sendSelectedSong();
+      startTimer();
+    } catch (error) {
+      console.log('Error in loadNextSong:', error);
+    }
   });
 
   socket.on('sendWinner', (winner) => {
-    io.emit('winnerAnnounced', winner);
+    try {
+      io.emit('winnerAnnounced', winner);
+    } catch (error) {
+      console.log('Error in sendWinner:', error);
+    }
   });
 
-  // Beispiel: Server-seitige Logik zum Senden der Guesses an alle Clients
-socket.on('userGuess', ({ username, guess, isCorrect }) => {
-  io.emit('updateGuesses', { username, guess, isCorrect });
-});
+  socket.on('userGuess', ({ username, guess, isCorrect }) => {
+    try {
+      io.emit('updateGuesses', { username, guess, isCorrect });
+    } catch (error) {
+      console.log('Error in userGuess:', error);
+    }
+  });
 
-socket.on('resetGameAndPoints', () => {
-  io.emit('resetGameState'); // An alle Clients senden
-  io.emit('resetPoints'); // An alle Clients sende
-});
+  socket.on('resetGameAndPoints', () => {
+    try {
+      io.emit('resetGameState');
+      io.emit('resetPoints');
+    } catch (error) {
+      console.log('Error in resetGameAndPoints:', error);
+    }
+  });
 
-socket.on('startGameAndHideButton', () => {
-  io.emit('hideStartButton'); // An alle Clients senden
-});
+  socket.on('startGameAndHideButton', () => {
+    try {
+      io.emit('hideStartButton');
+    } catch (error) {
+      console.log('Error in startGameAndHideButton:', error);
+    }
+  });
 
- // Chat-Nachrichten
- socket.on('sendMessage', (message) => {
-  io.emit('receiveMessage', message);
-});
-
-
+  socket.on('sendMessage', (message) => {
+    try {
+      io.emit('receiveMessage', message);
+    } catch (error) {
+      console.log('Error in sendMessage:', error);
+    }
+  });
 });
