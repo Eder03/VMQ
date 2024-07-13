@@ -41,7 +41,9 @@ httpServer.listen(port, () => {
 });
 
 function sendSelectedSong() {
-  if (playedSongs.length === musicData.reduce((total, game) => total + game.songs.length, 0)) {
+  // Überprüfen, ob alle Songs bereits gespielt wurden
+  const totalSongs = musicData.reduce((total, game) => total + game.songs.length, 0);
+  if (playedSongs.length === totalSongs) {
     console.log('All songs have been played.');
     return;
   }
@@ -50,17 +52,28 @@ function sendSelectedSong() {
   let isUnique = false;
 
   while (!isUnique) {
-    const k = Math.floor(Math.random() * musicData.length);
-    const p = Math.floor(Math.random() * musicData[k].songs.length);
-    const songId = `${musicData[k].name}_${musicData[k].songs[p].link}`; // Create a unique identifier for the song
+    // Erstellen einer Liste aller Songs
+    const allSongs = [];
+    musicData.forEach(game => {
+      game.songs.forEach(song => {
+        allSongs.push({ game, song });
+      });
+    });
+
+    console.log(allSongs)
+
+    // Zufälligen Song aus der Liste auswählen
+    const randomIndex = Math.floor(Math.random() * allSongs.length);
+    const { game, song } = allSongs[randomIndex];
+    const songId = `${game.name}_${song.link}`;
 
     if (!playedSongs.includes(songId)) {
       selectedSong = {
-        video: `https://www.youtube.com/embed/${musicData[k].songs[p].link}?start=10&autoplay=1&showinfo=0&loop=1`,
-        currentGame: musicData[k],
-        currentSong: musicData[k].songs[p]
+        video: `https://www.youtube.com/embed/${song.link}?start=10&autoplay=1&showinfo=0&loop=1`,
+        currentGame: game,
+        currentSong: song
       };
-      playedSongs.push(songId); // Add the song to the played list
+      playedSongs.push(songId); // Song zur Liste der gespielten Songs hinzufügen
       isUnique = true;
     }
   }
