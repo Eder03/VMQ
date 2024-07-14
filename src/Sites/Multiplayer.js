@@ -50,7 +50,10 @@ export default class ApiForm extends Component {
       selectedSkin: '',
       skins: [],
       activePage: 1,
-      itemsPerPage: 6
+      itemsPerPage: 6,
+      showVideo: false,
+      timerFinished: false
+
     };
 
     //this.socket = io('localhost:5002');
@@ -171,7 +174,7 @@ export default class ApiForm extends Component {
     
 
     this.socket.on('startTimer', ({ remainingTime }) => {
-      this.setState({ remainingTime, countdownPlaying: true });
+      this.setState({ remainingTime, countdownPlaying: true, timerFinished: false });
       this.startTimerAnimation();
       this.resetGuesses()
       this.resetDropdown();
@@ -182,7 +185,7 @@ export default class ApiForm extends Component {
     });
 
     this.socket.on('timerFinished', () => {
-      this.setState({ countdownPlaying: false, loadingNextSong: true });
+      this.setState({ countdownPlaying: false, loadingNextSong: true, timerFinished: true });
       this.guessSong();
       this.sendPoints();
     });
@@ -258,29 +261,30 @@ export default class ApiForm extends Component {
   
 
   startTimerAnimation = () => {
+    this.setState({isPaused: false})
     const { timerStart } = this.state;
-    const intervalDuration = 1000 / timerStart; // Intervalldauer berechnen basierend auf der Startzeit
-  
+    const intervalDuration = 1000 / timerStart;
+    this.setState({showVideo: false})
+
     const timerInterval = setInterval(() => {
       const { remainingTime, countdownPlaying } = this.state;
-  
+
       if (countdownPlaying && remainingTime > 0) {
-        // Aktualisierten Kreisfortschritt berechnen
         const timePercentage = (remainingTime / timerStart) * 100;
         const circleProgress = 2 * Math.PI * 45 * (1 - timePercentage / 100);
         this.setState({ circleProgress });
       } else {
-        // Wenn Countdown nicht mehr läuft oder Zeit abgelaufen ist, Animation stoppen und Kreis vollständig anzeigen
         clearInterval(timerInterval);
         this.setState({ circleProgress: 2 * Math.PI * 45 });
+        
+          this.setState({ showVideo: true });
+          this.setState({isPaused: true})
+        
       }
     }, intervalDuration);
-  
+
     this.setState({ timerInterval });
   };
-  loadNextSong = () => {
-    this.socket.emit('loadNextSong');
-  }
 
   guessSong = () => {
     const { userGuess, selectedsong, username } = this.state;
@@ -394,18 +398,7 @@ export default class ApiForm extends Component {
   render() {
     const { username, activePage, itemsPerPage, skins, selectedSkin, message, chatMessages, winners, winnerInfo, guesses, clients, points, countdownPlaying, remainingTime, loadingNextSong, selectedsong, connectedClients, showModal, winnerUsernames, winnerPoints, circleProgress, isPaused, roundCount, maxRounds } = this.state;
   
-    const svgStyle = {
-      width: '100px',
-      height: '100px',
-    };
-  
-    const circleStyle = {
-      transition: 'stroke-dashoffset 1s ease-in-out',
-      strokeDasharray: `${2 * Math.PI * 45}`,
-      strokeDashoffset: circleProgress,
-      transform: 'rotate(-90deg)',
-      transformOrigin: 'center',
-    };
+    
   
     const textStyle = {
       fontSize: '14px',
@@ -430,6 +423,57 @@ export default class ApiForm extends Component {
       zIndex: 1000,
       width: '300px',
     };
+
+    const svgStyle = {
+      width: '120px',
+      height: '120px',
+    };
+  
+    const circleStyle = {
+      transition: 'stroke-dashoffset 1s ease-in-out',
+      strokeDasharray: `${2 * Math.PI * 45}`,
+      strokeDashoffset: circleProgress,
+      transform: 'rotate(-90deg)',
+      transformOrigin: 'center',
+    };
+
+    const timerBoxStyle = {
+      width: '320px',
+      height: '220px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      border: '0.5px solid #21ba45',
+      borderRadius: '15px',
+      margin: '20px auto', // Center horizontally
+    };
+
+    const videoVisible = {
+      
+      postion:'absolute',
+      display: 'flex',
+      width: '320px',
+      height: '220px',
+      borderRadius: '15px',
+      transition: 'opacity 0.4s ease',
+      opacity: 1,
+      pointerEvents: 'none',
+      margin: '20px auto', // Center horizontally
+    };
+
+    const videoHidden = {
+      position: 'fixed',
+      bottom: '10px',
+      right: '10px',
+      width: '300px',
+      height: '200px',
+      borderRadius: '10px',
+      opacity: 0,
+      pointerEvents: 'none' // Deaktiviert Mausereignisse auf ausgeblendetem Video
+    };
+
+    
+
 
     const indexOfLastItem = activePage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -512,22 +556,39 @@ export default class ApiForm extends Component {
             <Grid centered>
               <Grid.Row>
                 <Grid.Column width={8} textAlign="center">
-                  <svg style={svgStyle} viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ddd" strokeWidth="10"></circle>
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="#21ba45"
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                      style={circleStyle}
-                    ></circle>
-                    <text x="50" y="50" style={textStyle}>
-                      {countdownPlaying && !isPaused ? remainingTime : 'Paused'}
-                    </text>
-                  </svg>
+                
+                {!isPaused && (
+                  <div style={timerBoxStyle}>
+                    <svg style={svgStyle} viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="45" fill="none" stroke="#ddd" strokeWidth="10"></circle>
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="#21ba45"
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                        style={circleStyle}
+                      ></circle>
+                      <text x="50" y="50" style={textStyle}>
+                        {countdownPlaying ? remainingTime : 'Paused'}
+                      </text>
+                    </svg>
+                    </div>
+                  )}
+
+              <iframe
+              id="youtube-video"
+              style={this.state.showVideo ? videoVisible : videoHidden}
+              src={`${this.state.selectedsong.video}?modestbranding=1&iv_load_policy=3&rel=0`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="autoplay; encrypted-media;"
+              allowFullScreen
+            ></iframe>
+
+
                 </Grid.Column>
               </Grid.Row>
   
@@ -586,7 +647,9 @@ export default class ApiForm extends Component {
               )}
             </Grid>
   
-            <iframe id="youtube-video" width="0" height="0" src={this.state.selectedsong.video} title="YouTube video player" frameBorder="0" allow="autoplay; encrypted-media;" allowFullScreen></iframe>
+           
+            
+        
 
             <Grid.Row style={{ position: 'fixed', bottom: '0', right: '0', width: '300px', margin: '20px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: 'white' }}>
   <div style={{ maxHeight: '150px', overflowY: 'auto', padding: '10px' }}>
