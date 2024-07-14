@@ -23,16 +23,40 @@ const pauseDuration = 7;
 let timer = null;
 let currentRound = 0;
 const maxRounds = 20;
-
 let playedSongs = [];
 
 const port = process.env.PORT || 5002;
+const YOUTUBE_API_KEY = process.env.ytapi; // Füge hier deinen YouTube API-Schlüssel ein
 
 httpServer.listen(port, () => {
   console.log('listening on ' + port);
 });
 
-function sendSelectedSong() {
+async function getVideoDuration(videoId) {
+  try {
+    const response = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
+      params: {
+        id: videoId,
+        part: 'contentDetails',
+        key: YOUTUBE_API_KEY
+      }
+    });
+    const duration = response.data.items[0].contentDetails.duration;
+    return parseISO8601Duration(duration);
+  } catch (error) {
+    console.error('Error fetching video duration:', error);
+    return 10; // Fallback auf 240 Sekunden (4 Minuten)
+  }
+}
+
+function parseISO8601Duration(duration) {
+  const match = duration.match(/PT(\d+M)?(\d+S)?/);
+  const minutes = parseInt(match[1] || '0', 10);
+  const seconds = parseInt(match[2] || '0', 10);
+  return (minutes * 60) + seconds;
+}
+
+async function sendSelectedSong() {
   try {
     const totalSongs = musicData.reduce((total, game) => total + game.songs.length, 0);
     if (playedSongs.length === totalSongs) {
@@ -56,13 +80,18 @@ function sendSelectedSong() {
       const songId = `${game.name}_${song.link}`;
 
       if (!playedSongs.includes(songId)) {
+        const videoDuration = await getVideoDuration(song.link);
+        const maxStartTime = videoDuration - 30; // 30 Sekunden vor Ende
+        const startTime = Math.floor(Math.random() * maxStartTime);
+
         selectedSong = {
-          video: `https://www.youtube.com/embed/${song.link}?start=10&autoplay=1&showinfo=0&loop=1`,
+          video: `https://www.youtube.com/embed/${song.link}?start=${startTime}&autoplay=1&showinfo=0&loop=1`,
           currentGame: game,
           currentSong: song
         };
         playedSongs.push(songId);
         isUnique = true;
+        console.log(selectedSong.video)
       }
     }
 
