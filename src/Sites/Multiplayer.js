@@ -438,7 +438,7 @@ export default class ApiForm extends Component {
     };
 
     const timerBoxStyle = {
-      width: '320px',
+      width: '391.111px',
       height: '220px',
       display: 'flex',
       justifyContent: 'center',
@@ -452,7 +452,7 @@ export default class ApiForm extends Component {
       
       postion:'absolute',
       display: 'flex',
-      width: '320px',
+      width: '391.111px',
       height: '220px',
       borderRadius: '15px',
       transition: 'opacity 0.4s ease',
