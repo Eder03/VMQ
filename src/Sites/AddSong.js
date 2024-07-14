@@ -185,6 +185,7 @@ export default class AddSong extends Component {
               placeholder='Select Game'
               fluid
               selection
+              search
               options={this.state.dropdownOptions}
               onChange={this.onChangeDropdown}
               value={game}
