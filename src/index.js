@@ -27,6 +27,7 @@ export default function Routing() {
     //Router für die einzelnen Elemente
    <Router>
      <Navbar />
+     <hr color='#2d394d'/>
    <Routes> 
           
           <Route index element={<Home/>} />

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Card, Form, Grid, Image, Modal, Button, Label, Input, Segment, Icon, Pagination } from 'semantic-ui-react';
+import { Card, Form, Grid, Image, Modal, Button, Label, Input, Segment, Icon, Pagination, Dropdown } from 'semantic-ui-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import "../styles/customCss.css"
 
 export default class ApiForm extends Component {
   constructor(props) {
@@ -366,9 +367,9 @@ export default class ApiForm extends Component {
 
   renderResult() {
     return (
-      <div style={{ marginTop: '5px', width: '300px' }}>
-        <Segment compact>
-          <Label>Last game info</Label>
+      <div style={{ marginTop: '5px', width: '300px', backgroundColor: "#1a1a1d" }}>
+        <Segment compact style={{backgroundColor: "#36343B", color: "#FFFFF0"}}>
+          <Label style={{backgroundColor: "#2b2b33", color: "#FFFFF0"}}>Last game info</Label>
           <br />
           <br />
           <b>Game: </b> {this.state.gameBefore.game}
@@ -404,7 +405,8 @@ export default class ApiForm extends Component {
       fontSize: '14px',
       dominantBaseline: 'middle',
       textAnchor: 'middle',
-      fill: '#000',
+      fill: 'white',
+      color: 'white'
     };
   
     const roundInfoStyle = {
@@ -419,7 +421,7 @@ export default class ApiForm extends Component {
       top: '50px',
       left: '10px',
       padding: '10px',
-      backgroundColor: 'white',
+      backgroundColor: '#1a1a1d',
       zIndex: 1000,
       width: '300px',
     };
@@ -443,7 +445,7 @@ export default class ApiForm extends Component {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      border: '0.5px solid #21ba45',
+      border: '3px solid #ee4d40',
       borderRadius: '15px',
       margin: '20px auto', // Center horizontally
     };
@@ -549,7 +551,7 @@ export default class ApiForm extends Component {
   
             <div style={roundInfoStyle}>
               {roundCount > 0 && (
-                <Label>Round {roundCount} of {maxRounds}</Label>
+                <Label style={{backgroundColor: "#2b2b33", color: "#FFFFF0"}}>Round {roundCount} of {maxRounds}</Label>
               )}
             </div>
   
@@ -560,13 +562,13 @@ export default class ApiForm extends Component {
                 {!isPaused && (
                   <div style={timerBoxStyle}>
                     <svg style={svgStyle} viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="45" fill="none" stroke="#ddd" strokeWidth="10"></circle>
+                      
                       <circle
                         cx="50"
                         cy="50"
                         r="45"
                         fill="none"
-                        stroke="#21ba45"
+                        stroke="#ee4d40"
                         strokeWidth="10"
                         strokeLinecap="round"
                         style={circleStyle}
@@ -595,7 +597,10 @@ export default class ApiForm extends Component {
               <Grid.Row>
                 <Grid.Column width={8}>
                   <Form onSubmit={this.onSubmit}>
-                    <Form.Dropdown
+                    <Form.Dropdown 
+                    
+                      as={Dropdown}
+                      inverted
                       placeholder="Select Game"
                       fluid
                       selection
@@ -605,7 +610,8 @@ export default class ApiForm extends Component {
                       value={this.state.userGuess} // Bindung des Dropdowns an den Zustand
                       onChange={this.onChangeDropdown}
                       selectOnNavigation={true}
-                      style={{ minWidth: '400px' }}
+                      style={{ minWidth: '400px', backgroundColor:"#36343B", color:"#FFFFF0", }}
+                      
                     />
                   </Form>
                 </Grid.Column>
@@ -613,16 +619,16 @@ export default class ApiForm extends Component {
   
               <Grid.Row style={{ marginTop: '20px' }}>
               {connectedClients.map((client, index) => (
-            <Card.Group centered key={index} style={{ margin: '12px' }}>
-              <Card style={{ width: '250px' }}>
-                <div style={{ height: '250px', overflow: 'hidden' }}>
+            <Card.Group centered key={index} style={{ margin: '12px'}}>
+              <Card  style={{ width: '250px' , backgroundColor:"#36343B", border: '2.2px solid #ee4d40' , boxShadow: "none"}}>
+                <div style={{ height: '250px', overflow: 'hidden', backgroundColor:"#FFFFF0" }}>
                   <Image src={client.skin} style={{ width: '250px', height: '250px', objectFit: 'cover' }} />
                 </div>
                 <Card.Content>
-                  <Card.Header>{client.username}</Card.Header>
-                  <Card.Meta>Spieler</Card.Meta>
+                  <Card.Header style={{color: "#FFFFF0"}}>{client.username}</Card.Header>
+                  <Card.Meta style={{color: "#bfbfbf"}}>Gamer</Card.Meta>
                   <Card.Description>
-                    <h2>Punkte: {client.points}</h2>
+                    <h2  style={{color: "#FFFFF0"}}>Punkte: {client.points}</h2>
                   </Card.Description>
                 </Card.Content>
                 {guesses[client.username] && (
@@ -641,7 +647,7 @@ export default class ApiForm extends Component {
               {this.state.showStartButton && (
                 <Grid.Row>
                   <Form>
-                    <Form.Button content="Start" color="green" onClick={this.startGame} />
+                    <Form.Button content="Start" color="green" onClick={this.startGame} style={{backgroundColor: "#ee4d40"}}/>
                   </Form>
                 </Grid.Row>
               )}
@@ -651,19 +657,20 @@ export default class ApiForm extends Component {
             
         
 
-            <Grid.Row style={{ position: 'fixed', bottom: '0', right: '0', width: '300px', margin: '20px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: 'white' }}>
-  <div style={{ maxHeight: '150px', overflowY: 'auto', padding: '10px' }}>
+            <Grid.Row style={{ position: 'fixed', bottom: '0', right: '0', width: '300px', margin: '20px', border: '1.5px solid #0e0e12', borderRadius: '5px', backgroundColor: 'white' }}>
+  <div style={{ maxHeight: '150px', overflowY: 'auto', padding: '10px' , backgroundColor:"#36343B", color:"#FFFFF0"}}>
     {this.state.chatMessages.map((msg, index) => (
       <div key={index}><strong>{msg.username}:</strong> {msg.message}</div>
     ))}
     <div ref={(el) => { this.messagesEnd = el; }}></div>
   </div>
-  <Form onSubmit={this.handleSendMessage} style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+  <Form onSubmit={this.handleSendMessage} style={{ display: 'flex', alignItems: 'center', padding: '10px', backgroundColor:"#36343B", color:"#FFFFF0" }}>
     <Input
       placeholder='Nachricht...'
       value={this.state.message}
       onChange={(e) => this.setState({ message: e.target.value })}
       style={{ flex: '1' }}
+      
     />
     <Button type='submit' icon>
       <Icon name='send' />

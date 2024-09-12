@@ -12,7 +12,7 @@ export default class MenuExampleContentProp extends Component {
 
     return (
       //Navbar mit Elementen
-    <Menu attached='top' >
+    <Menu attached='top' style={{backgroundColor: "#18181B"}}  inverted>
       <Menu.Item as={Link} to='/'
           
           active={activeItem === 'Game'}
@@ -20,7 +20,7 @@ export default class MenuExampleContentProp extends Component {
           onClick={this.handleItemClick}
         />
         {/*Dropdown in der Navbar*/}
-      <Dropdown text='API' item icon='wrench' simple className='right' closeOnBlur>
+      <Dropdown text='API' item icon='wrench' simple className='right' closeOnBlur >
             {/*Elemente im Dropdown, as Link = Routing*/}
             <Dropdown.Menu className='left' closeOnChange closeOnBlur closeOnEscape>
               <Dropdown.Item as={Link} to='/addgame'>Add Game</Dropdown.Item>
@@ -28,7 +28,9 @@ export default class MenuExampleContentProp extends Component {
             </Dropdown.Menu>
         
       </Dropdown>
+      
     </Menu>
+    
    
     )
   }
