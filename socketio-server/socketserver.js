@@ -58,43 +58,44 @@ function parseISO8601Duration(duration) {
 
 async function sendSelectedSong() {
   try {
-    const totalSongs = musicData.reduce((total, game) => total + game.songs.length, 0);
-    if (playedSongs.length === totalSongs) {
-      console.log('All songs have been played.');
-      return;
+    const totalGames = musicData.length;
+
+    // Wenn alle Spiele in der Runde gespielt wurden, zurücksetzen
+    if (playedSongs.length === totalGames) {
+      console.log('All games have been played in this round.');
+      playedSongs = []; // Zurücksetzen der gespielten Spiele für die nächste Runde
     }
 
-    let selectedSong;
-    let isUnique = false;
+    let selectedGame;
+    let isUniqueGame = false;
 
-    while (!isUnique) {
-      const allSongs = [];
-      musicData.forEach(game => {
-        game.songs.forEach(song => {
-          allSongs.push({ game, song });
-        });
-      });
+    // Wähle ein Spiel, das in dieser Runde noch nicht gespielt wurde
+    while (!isUniqueGame) {
+      const randomGameIndex = Math.floor(Math.random() * musicData.length);
+      selectedGame = musicData[randomGameIndex];
 
-      const randomIndex = Math.floor(Math.random() * allSongs.length);
-      const { game, song } = allSongs[randomIndex];
-      const songId = `${game.name}_${song.link}`;
-
-      if (!playedSongs.includes(songId)) {
-        const videoDuration = await getVideoDuration(song.link);
-        const maxStartTime = videoDuration - 30; // 30 Sekunden vor Ende
-        const startTime = Math.floor(Math.random() * maxStartTime);
-
-        selectedSong = {
-          video: `https://www.youtube.com/embed/${song.link}?start=${startTime}&autoplay=1&showinfo=0&loop=1`,
-          currentGame: game,
-          currentSong: song
-        };
-        playedSongs.push(songId);
-        isUnique = true;
-        console.log(selectedSong.video)
+      if (!playedSongs.includes(selectedGame.name)) {
+        playedSongs.push(selectedGame.name); // Füge das Spiel zur Liste der gespielten Spiele hinzu
+        isUniqueGame = true;
       }
     }
 
+    // Wähle einen zufälligen Song aus dem ausgewählten Spiel
+    const randomSongIndex = Math.floor(Math.random() * selectedGame.songs.length);
+    const selectedSongData = selectedGame.songs[randomSongIndex];
+    const songId = `${selectedGame.name}_${selectedSongData.link}`;
+
+    const videoDuration = await getVideoDuration(selectedSongData.link);
+    const maxStartTime = videoDuration - 30; // 30 Sekunden vor Ende
+    const startTime = Math.floor(Math.random() * maxStartTime);
+
+    const selectedSong = {
+      video: `https://www.youtube.com/embed/${selectedSongData.link}?start=${startTime}&autoplay=1&showinfo=0&loop=1`,
+      currentGame: selectedGame,
+      currentSong: selectedSongData
+    };
+
+    console.log(selectedSong.video);
     io.emit('gameStarted', selectedSong, maxRounds);
   } catch (error) {
     console.log('Error in sendSelectedSong:', error);
