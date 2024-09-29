@@ -56,28 +56,30 @@ function parseISO8601Duration(duration) {
   return (minutes * 60) + seconds;
 }
 
+let playedGames = [];
+
 async function sendSelectedSong() {
   try {
-    const totalGames = musicData.length;
 
-    // Wenn alle Spiele in der Runde gespielt wurden, zurücksetzen
-    if (playedSongs.length === totalGames) {
-      console.log('All games have been played in this round.');
-      playedSongs = []; // Zurücksetzen der gespielten Spiele für die nächste Runde
+    const totalGames = musicData.length;
+    if (playedGames.length === totalGames) {
+      console.log('All songs have been played.');
+      playedGames = []
     }
 
     let selectedGame;
     let isUniqueGame = false;
 
-    // Wähle ein Spiel, das in dieser Runde noch nicht gespielt wurde
     while (!isUniqueGame) {
       const randomGameIndex = Math.floor(Math.random() * musicData.length);
       selectedGame = musicData[randomGameIndex];
 
-      if (!playedSongs.includes(selectedGame.name)) {
-        playedSongs.push(selectedGame.name); // Füge das Spiel zur Liste der gespielten Spiele hinzu
+      if (!playedGames.includes(selectedGame.game)) {
+        playedGames.push(selectedGame.game); // Füge das Spiel zur Liste der gespielten Spiele hinzu
         isUniqueGame = true;
       }
+
+
     }
 
     // Wähle einen zufälligen Song aus dem ausgewählten Spiel
@@ -97,6 +99,7 @@ async function sendSelectedSong() {
 
     console.log(selectedSong.video);
     io.emit('gameStarted', selectedSong, maxRounds);
+   
   } catch (error) {
     console.log('Error in sendSelectedSong:', error);
   }
