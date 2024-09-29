@@ -610,7 +610,9 @@ export default class ApiForm extends Component {
                       value={this.state.userGuess} // Bindung des Dropdowns an den Zustand
                       onChange={this.onChangeDropdown}
                       selectOnNavigation={true}
-                      style={{ minWidth: '400px', backgroundColor:"#36343B", color:"#FFFFF0", }}
+                      style={{ minWidth: '400px', backgroundColor:"#36343B", color:"#FFFFF0", textStyle: {color: "#FFFFF0"}}}
+                      textStyle={{color: "#FFFFF0"}}
+                      searchInput={{ style: { color: "#FFFFF0" }}}
                       
                     />
                   </Form>
